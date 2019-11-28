@@ -1,1 +1,1 @@
-from .bpe import bpe
+from lna.algorithms.bpe import bpe

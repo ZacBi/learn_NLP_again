@@ -17,19 +17,7 @@ def get_stats(vocab: Dict):
     return pairs
 
 
-def corpus_proc(path=None):
-    path = path or '../data/bpe.txt'
-    file_obj = open(path, 'r')
-    vocab = defaultdict(int)
-    special_token = '_'
-    for line in file_obj.readlines():
-        words = line.split()
-        for word in words:
-            vocab[list(word) + [special_token]] += 1
-    return vocab
-
-
-def bpe(merge_iteration: int = 5):
+def bpe(vocab: Dict[str, int], merge_iteration: int = 5):
     """BPE algorithm.
 
     BPE learns tokenization from training data and use learned method 
@@ -43,7 +31,7 @@ def bpe(merge_iteration: int = 5):
         vocab: final vocab with `merge_iteration` most frequent
 
     """
-    vocab = corpus_proc()
+    vocab = vocab
     for i in range(merge_iteration):
         # pairs is the collectiotn of two-symbol pair
         # e.g. (w, e_) or (e, ew_)

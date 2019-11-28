@@ -9,6 +9,8 @@ from click.testing import CliRunner
 from lna import lna
 from lna import cli
 
+from lna import (corpus_to_vocab, bpe,)
+
 
 @pytest.fixture
 def response():
@@ -35,3 +37,8 @@ def test_command_line_interface():
     help_result = runner.invoke(cli.main, ['--help'])
     assert help_result.exit_code == 0
     assert '--help  Show this message and exit.' in help_result.output
+
+def test_bpe():
+    path = '../data/bpe.txt'
+    vocab = corpus_to_vocab(path)
+    vocab = bpe(vocab)
