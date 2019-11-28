@@ -103,3 +103,11 @@ ENV/
 
 # IDE settings
 .vscode/
+
+# data
+/data
+
+# tex
+*.pdf
+*.gz
+*.aux
