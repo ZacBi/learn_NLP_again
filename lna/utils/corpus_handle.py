@@ -8,5 +8,6 @@ def corpus_to_vocab(path=None):
     for line in file_obj.readlines():
         words = line.split()
         for word in words:
-            vocab[list(word) + [special_token]] += 1
+            word = ' '.join(list(word) + [special_token])
+            vocab[word] += 1
     return vocab
