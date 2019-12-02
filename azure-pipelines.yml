@@ -1,0 +1,61 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+
+steps:
+- bash: |
+    # Install conda to boost numpy/scipy installation.
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    bash miniconda.sh -b -p $HOME/miniconda
+    source "$HOME/miniconda/etc/profile.d/conda.sh"
+    conda config --set always_yes yes --set changeps1 no
+    conda update -q conda
+    # Useful for debugging any issues with conda
+    conda info -a
+    # Setup env.
+    conda create -n test python=$(python.version)
+    # Alias.
+    echo 'source "$HOME/miniconda/etc/profile.d/conda.sh" && conda activate test' > "$HOME/env.sh"
+  displayName: 'Setup conda.'
+
+- bash: |
+    source "$HOME/env.sh"
+    pip install -U pip
+    pip install -U -r requirements_dev.txt
+  env:
+    PIP_INDEX_URL: https://mirrors.aliyun.com/pypi/simple
+  displayName: 'Install dev dependencies'
+
+- bash: |
+    source "$HOME/env.sh"
+    pip install -e $(pwd) --no-binary :all:
+  env:
+    PIP_INDEX_URL: https://mirrors.aliyun.com/pypi/simple
+  displayName: 'Install prod dependencies and the package'
+
+- bash: |
+    source "$HOME/env.sh"
+    pytest
+  displayName: 'Test: pytest'
+
+- bash: |
+    source "$HOME/env.sh"
+    pylint frankenstein
+  displayName: 'Test: pylint'
+
+- bash: |
+    source "$HOME/env.sh"
+    yapf -d -r frankenstein
+  displayName: 'Test: yapf'
