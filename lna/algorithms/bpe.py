@@ -19,9 +19,9 @@ def byte_pair_encoding(
     """Chapter 2.4.3
     BPE: Byte-Pair Encoding.
 
-    BPE learns tokenization from training data and use learned method 
+    BPE learns tokenization from training data and use learned method
     to tokenize training data.
-    
+
     Args:
         merge_iteration: the number of iteration you want bpe to learn
             tokenization, defualt 5(int)
@@ -32,7 +32,7 @@ def byte_pair_encoding(
     """
     vocab = vocab
     best_bigrams = []
-    for i in range(merge_iteration):
+    for iters in range(merge_iteration):
         # pairs is the collectiotn of two-symbol pair
         # e.g. (w, e_) or (e, ew_)
         pairs = defaultdict(int)
