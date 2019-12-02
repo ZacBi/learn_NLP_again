@@ -30,9 +30,9 @@ def byte_pair_encoding(
         vocab: final vocab with `merge_iteration` most frequent
 
     """
-    vocab = vocab
+
     best_bigrams = []
-    for iters in range(merge_iteration):
+    for _ in range(merge_iteration):
         # pairs is the collectiotn of two-symbol pair
         # e.g. (w, e_) or (e, ew_)
         pairs = defaultdict(int)

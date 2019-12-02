@@ -3,12 +3,22 @@ bump2version==0.5.11
 wheel==0.33.6
 watchdog==0.9.0
 flake8==3.7.8
-tox==3.14.0
 coverage==4.5.4
 Sphinx==1.8.5
 twine==1.14.0
 Click==7.0
-pytest==4.6.5
-pytest-runner==5.1
-pylint==2.4.4
+
+# CI.
+tox==3.14.0
 yapf==0.28.0
+pylint==2.4.3
+mypy==0.740
+pytest==5.2.2
+pytest-runner==5.2
+pytest-profiling==1.7.0
+coverage==4.5.4
+
+# Dev.
+invoke==1.3.0
+ipython==7.9.0
+pur==5.2.2

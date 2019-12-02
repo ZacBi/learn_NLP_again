@@ -12,14 +12,14 @@ def min_edit_distance(
         sub_cost=2,
 ):
     """Minimum-Edit-Distance(DP)
-    
+
     Args:
         `source`: source chars.
         `target`: target chars.
         `del_cost`: delete cost.
         `ins_cost`: insert cost.
         `sub_cost`: substitute cost.
-        
+
     Returns:
         minimun edit distance between `source` and `target`
 
@@ -46,7 +46,7 @@ def min_edit_distance(
 
     for i in range(1, source_len + 1):
         for j in range(1, target_len + 1):
-            up = matrix[i - 1][j] + del_cost
+            up = matrix[i - 1][j] + del_cost  # pylint: disable=invalid-name
             left = matrix[i][j - 1] + ins_cost
             northwest = matrix[i - 1][j - 1] \
                     + (sub_cost if source[i - 1] != target[j - 1] else 0)
@@ -64,17 +64,17 @@ def min_edit_distance_pro(
         sub_cost=2,
 ):
     """Augmented minimum-edit-distance(DP) with alignment.
-    
+
     Args:
         `source`: source chars.
         `target`: target chars.
         `del_cost`: delete cost.
         `ins_cost`: insert cost.
         `sub_cost`: substitute cost.
-        
+
     Returns:
         med: minimun edit distance between `source` and `target`
-        matrix: 
+        matrix:
 
     Algorithm:
         D[i, j] = min(
@@ -111,7 +111,7 @@ def min_edit_distance_pro(
     min_cost = 0
     for i in range(1, source_len + 1):
         for j in range(1, target_len + 1):
-            up = matrix[i - 1][j] + del_cost
+            up = matrix[i - 1][j] + del_cost  # pylint: disable=invalid-name
             left = matrix[i][j - 1] + ins_cost
             northwest = matrix[i - 1][j - 1] \
                     + (sub_cost if source[i - 1] != target[j - 1] else 0)
