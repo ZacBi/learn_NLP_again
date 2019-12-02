@@ -52,10 +52,10 @@ steps:
 
 - bash: |
     source "$HOME/env.sh"
-    pylint frankenstein
+    pylint lna
   displayName: 'Test: pylint'
 
 - bash: |
     source "$HOME/env.sh"
-    yapf -d -r frankenstein
+    yapf -d -r lna
   displayName: 'Test: yapf'
