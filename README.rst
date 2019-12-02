@@ -32,7 +32,7 @@ Here is why I started this project: **learn NLP from scratch again**. I choose `
 Usage
 --------
 
-.. codeblock::shell
+.. codeblock:: shell
 	:linenos:
 
     git clone git@github.com:ZacBi/learn_NLP_again.git
@@ -42,7 +42,7 @@ Usage
 
 pytest:
 
-.. codeblock::python
+.. codeblock:: python
 	:linenos:
 
 	pytest ./tests/
