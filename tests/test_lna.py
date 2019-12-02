@@ -9,10 +9,7 @@ from lna import lna
 from lna import cli
 
 from lna.utils import corpus_to_vocab
-from lna.algorithms import (
-    byte_pair_encoding,
-    min_edit_distance,
-)
+from lna.algorithms import *
 
 # TODO: write a data tools to process path or file handling.
 DATA_FD = './data'
@@ -45,28 +42,28 @@ def test_command_line_interface():
     assert '--help  Show this message and exit.' in help_result.output
 
 
-# def test_bpe():
-#     # Notice that in the first iteration,
-#     # that 'r _' has the same frequency as 'e r'.
-#     path = lib_path.join(DATA_FD, 'bpe.txt')
-#     vocab = corpus_to_vocab(path)
-#     vocab, best_bigrams = bpe(vocab)
-#     assert (vocab, best_bigrams) == (
-#         {
-#             'lo w _': 5,
-#             'lo w e s t _': 2,
-#             'new _': 2,
-#             'new er_': 6,
-#             'w i d er_': 3
-#         },
-#         [
-#             'er',
-#             'er_',
-#             'ne',
-#             'new',
-#             'lo',
-#         ],
-#     )
+def test_bpe():
+    # Notice that in the first iteration,
+    # that 'r _' has the same frequency as 'e r'.
+    path = lib_path.join(DATA_FD, 'bpe.txt')
+    vocab = corpus_to_vocab(path)
+    vocab, best_bigrams = byte_pair_encoding(vocab)
+    assert (vocab, best_bigrams) == (
+        {
+            'lo w _': 5,
+            'lo w e s t _': 2,
+            'new _': 2,
+            'new er_': 6,
+            'w i d er_': 3
+        },
+        [
+            'er',
+            'er_',
+            'ne',
+            'new',
+            'lo',
+        ],
+    )
 
 
 def test_med():
@@ -75,4 +72,16 @@ def test_med():
     source = 'leda'
     target = 'deal'
     result = min_edit_distance(source, target)
+    result_aug, aligment = min_edit_distance_pro(source, target)
     assert result == 4
+    assert (result_aug, aligment) == (
+        4,
+        [
+            ('l', '*', 'd'),
+            ('e', '*', 'd'),
+            ('d', 'd', ' '),
+            ('*', 'e', 'i'),
+            ('a', 'a', ' '),
+            ('*', 'l', 'i'),
+        ],
+    )
