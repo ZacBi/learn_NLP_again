@@ -8,9 +8,10 @@ from click.testing import CliRunner
 from lna import lna
 from lna import cli
 
-from lna import (
-    corpus_to_vocab,
-    bpe,
+from lna.utils import corpus_to_vocab
+from lna.algorithms import (
+    byte_pair_encoding,
+    min_edit_distance,
 )
 
 # TODO: write a data tools to process path or file handling.
@@ -44,29 +45,34 @@ def test_command_line_interface():
     assert '--help  Show this message and exit.' in help_result.output
 
 
-def test_bpe():
-    # Notice that in the first iteration,
-    # that 'r _' has the same frequency as 'e r'.
-    path = lib_path.join(DATA_FD, 'bpe.txt')
-    vocab = corpus_to_vocab(path)
-    vocab, best_bigrams = bpe(vocab)
-    assert (vocab, best_bigrams) == (
-        {
-            'lo w _': 5,
-            'lo w e s t _': 2,
-            'new _': 2,
-            'new er_': 6,
-            'w i d er_': 3
-        },
-        [
-            'er',
-            'er_',
-            'ne',
-            'new',
-            'lo',
-        ],
-    )
+# def test_bpe():
+#     # Notice that in the first iteration,
+#     # that 'r _' has the same frequency as 'e r'.
+#     path = lib_path.join(DATA_FD, 'bpe.txt')
+#     vocab = corpus_to_vocab(path)
+#     vocab, best_bigrams = bpe(vocab)
+#     assert (vocab, best_bigrams) == (
+#         {
+#             'lo w _': 5,
+#             'lo w e s t _': 2,
+#             'new _': 2,
+#             'new er_': 6,
+#             'w i d er_': 3
+#         },
+#         [
+#             'er',
+#             'er_',
+#             'ne',
+#             'new',
+#             'lo',
+#         ],
+#     )
 
 
-if __name__ == "__main__":
-    test_bpe()
+def test_med():
+    # Test minimum edit distance,
+    # and augmented minimum edit distance.
+    source = 'leda'
+    target = 'deal'
+    result = min_edit_distance(source, target)
+    assert result == 4

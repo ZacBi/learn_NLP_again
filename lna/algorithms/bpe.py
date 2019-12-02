@@ -12,7 +12,10 @@ def get_stats(vocab: Dict):
     return pairs
 
 
-def bpe(vocab: Dict[str, int], merge_iteration: int = 5):
+def byte_pair_encoding(
+        vocab: Dict[str, int],
+        merge_iteration: int = 5,
+):
     """Chapter 2.4.3
     BPE: Byte-Pair Encoding.
 
