@@ -1,0 +1,132 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+% \usepackage{ctex}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+    \title{Chapter 2}
+    \author{Zac Bi}
+    \date{\today}
+    \maketitle
+    \pagestyle{empty}
+\end{titlepage}
+
+
+\section*{Solutions}
+
+\subsection*{2.1}
+
+\subsubsection*{1.}
+
+[a-zA-Z]+
+
+\subsubsection*{2.}
+
+[a-z]*b
+
+\subsubsection*{3.}
+
+((?<=b)a(?=b)|b)+
+
+\subsection*{2.2}
+
+\subsubsection*{1.}
+
+.*([a-zA-Z]+) \textbackslash s (\textbackslash 1)) .*
+
+\subsubsection*{2.}
+
+\^{}\textbackslash d .* [a-zA-Z]+\$
+
+\subsubsection*{3.}
+
+(?<=grotto)(?<=raven)\^{}.*\$
+
+\subsubsection*{4.}
+
+(([a-zA-Z]+).*?\textbackslash.)+
+
+\subsection*{2.3}
+
+Omit.
+
+\subsection*{2.4}
+
+\begin{center}
+    \begin{tabular}{| c | c | c | c | c | c | }
+        \hline
+        Src \textbackslash Tar & \#             & d                                & e                                & a                                & l                                \\
+        \hline
+        \#                     & 0              & $\leftarrow$ 1                   & $\leftarrow$ 2                   & $\leftarrow$ 3                   & $\leftarrow$ 4                   \\
+        \hline
+        l                      & \textuparrow 1 & $\nwarrow \uparrow \leftarrow$ 2 & $\nwarrow \uparrow \leftarrow$ 3 & $\nwarrow \uparrow \leftarrow$ 4 & $\nwarrow$ 3                     \\
+        \hline
+        e                      & \textuparrow 2 & $\nwarrow \uparrow \leftarrow$ 3 & $\nwarrow$ 2                     & $\leftarrow$ 3                   & $\uparrow \leftarrow$ 4          \\
+        \hline
+        d                      & \textuparrow 3 & $\nwarrow$ 2                     & $\uparrow \leftarrow$ 3          & $\nwarrow \uparrow \leftarrow$ 4 & $\nwarrow \uparrow \leftarrow$ 5 \\
+        \hline
+        a                      & \textuparrow 4 & $\uparrow$ 3                     & $\uparrow \leftarrow$ 4          & $\nwarrow$ 3                     & $\leftarrow$ 4                   \\
+        \hline
+    \end{tabular}
+\end{center}
+
+
+\subsection*{2.5}
+
+\subsubsection*{}
+
+drive and brief:
+
+\begin{center}
+    \begin{tabular}{| c | c | c | c | c | c | c | }
+        \hline
+        Src \textbackslash Tar & \#             & b                                & r                                & i                                & e                                & f                                \\
+        \hline
+        \#                     & 0              & $\leftarrow$ 1                   & $\leftarrow$ 2                   & $\leftarrow$ 3                   & $\leftarrow$ 4                   & $\leftarrow$ 5                   \\
+        \hline
+        d                      & \textuparrow 1 & $\nwarrow \uparrow \leftarrow$ 2 & $\nwarrow \uparrow \leftarrow$ 3 & $\nwarrow \uparrow \leftarrow$ 4 & $\nwarrow \uparrow \leftarrow$ 5 & $\nwarrow \uparrow \leftarrow$ 6 \\
+        \hline
+        r                      & \textuparrow 2 & $\nwarrow \uparrow \leftarrow$ 3 & $\nwarrow$ 2                     & $\leftarrow$ 3                   & $\uparrow$ 4                     & $\leftarrow$ 5                   \\
+        \hline
+        i                      & \textuparrow 3 & $\nwarrow \uparrow \leftarrow$ 4 & $\uparrow$ 3                     & $\nwarrow$ 2                     & $\leftarrow$ 3                   & $\leftarrow$ 4                   \\
+        \hline
+        v                      & \textuparrow 4 & $\nwarrow \uparrow \leftarrow$ 5 & $\uparrow$ 4                     & $\uparrow$ 3                     & $\uparrow \leftarrow$ 4          & $\nwarrow \uparrow \leftarrow$ 5 \\
+        \hline
+        e                      & \textuparrow 4 & $\nwarrow \uparrow$ 5            & $\uparrow$ 5                     & $\uparrow$ 4                     & $\nwarrow$ 3                     & $\leftarrow$ 4                   \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsubsection*{}
+
+drive and divers:
+
+\begin{center}
+    \begin{tabular}{| c | c | c | c | c | c | c | c | }
+        \hline
+        Src \textbackslash Tar & \#             & d              & i              & v              & e              & r              & s                                \\
+        \hline
+        \#                     & 0              & $\leftarrow$ 1 & $\leftarrow$ 2 & $\leftarrow$ 3 & $\leftarrow$ 4 & $\leftarrow$ 5 & $\leftarrow$ 6                   \\
+        \hline
+        d                      & \textuparrow 1 & $\nwarrow$ 0   & $\leftarrow$ 1 & $\leftarrow$ 2 & $\leftarrow$ 3 & $\leftarrow$ 3 & $\leftarrow$ 4                   \\
+        \hline
+        r                      & \textuparrow 2 & $\uparrow$ 1   & $\leftarrow$ 2 & $\leftarrow$ 3 & $\leftarrow$ 4 & $\nwarrow$ 3   & $\leftarrow$ 4                   \\
+        \hline
+        i                      & \textuparrow 3 & $\uparrow$ 2   & $\nwarrow$ 1   & $\leftarrow$ 2 & $\leftarrow$ 3 & $\leftarrow$ 4 & $\nwarrow \uparrow \leftarrow$ 5 \\
+        \hline
+        v                      & \textuparrow 4 & $\uparrow$ 3   & $\uparrow$ 2   & $\nwarrow$ 1   & $\leftarrow$ 2 & $\leftarrow$ 3 & $\leftarrow$ 4                   \\
+        \hline
+        e                      & \textuparrow 4 & $\uparrow$ 4   & $\uparrow$ 3   & $\uparrow$ 2   & $\nwarrow$ 1   & $\leftarrow$ 2 & $\leftarrow$ 3                   \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsection*{2.6}
+
+Refer to algorithms/min\_edit\_distance.py
+
+\end{document}

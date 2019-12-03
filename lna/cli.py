@@ -4,7 +4,7 @@ import click
 
 
 @click.command()
-def main(args=None):
+def main(args=None):  # pylint: disable=unused-argument
     """Console script for lna."""
     click.echo("Replace this message by putting your code into "
                "lna.cli.main")
