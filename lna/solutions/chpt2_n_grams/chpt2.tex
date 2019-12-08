@@ -1,0 +1,70 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{ctex}
+\usepackage{amsmath}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+    \title{Chapter 2}
+    \author{Zac Bi}
+    \date{\today}
+    \maketitle
+    \pagestyle{empty}
+\end{titlepage}
+
+
+\section*{Solutions}
+
+\subsection*{3.1}
+
+\paragraph{1.}
+Equation for trigram prob estimation:
+
+$$P(w_n|w_{n-2}^{n-1}) =  \displaystyle\frac{C(w_{n-2}^{n})}{\sum_{w} C(w_{n-2} w_{n-1} w)} = \displaystyle\frac{C(w_{n-2}^{n})}{C(w_{n-2} w_{n-1})}$$
+
+\paragraph{2.}
+Add '<s> <s>' and '</s> </s>' at the start and end  of each sequence for counting trigrams.
+The resulting corpus:
+\begin{align*}
+     & \texttt{<s> <s> I am Sam </s> </s>}                         \\
+     & \texttt{<s> <s> Sam am I </s> </s>}                         \\
+     & \texttt{<s> <s> I do not like green eggs and ham </s> </s>}
+\end{align*}
+
+\paragraph{}
+So the trigrams probabilities of \texttt{I am Same} is:
+\begin{align*}
+     & P(\texttt{I|<s> <s>}) = \frac{2}{3} = 0.67 \quad
+    P(\texttt{am|<s> I}) = \frac{1}{2} = 0.5 \quad
+    P(\texttt{Sam|I am}) = \frac{1}{1} = 1              \\
+     & P(\texttt{</s>|am Sam}) = \frac{1}{1} = 1 \quad
+    P(\texttt{</s>|Sam </s>}) = \frac{1}{1} = 1 \quad
+\end{align*}
+
+\subsection*{3.2}
+
+\paragraph{1.}
+With Fig. 3.1
+\begin{align*}
+    P(\texttt{<s> i want chinese food </s>})
+     & = P(\texttt{i|<s>}) P(\texttt{want|i}) P(\texttt{chinese|want}) \\
+     & \qquad P(\texttt{food|chinese}) P(\texttt{</s>|food})           \\
+     & = 0.25 \times 0.33 \times 0.0065 \times 0.52 \times 0.68        \\
+     & = 0.0001896
+\end{align*}
+
+\paragraph{2.}
+Use add-1 smoothing table in Fig. 3.6
+\begin{align*}
+    P(\texttt{<s> i want chinese food </s>})
+     & = P(\texttt{i|<s>}) P(\texttt{want|i})P(\texttt{chinese|want}) \\
+     & \qquad P(\texttt{food|chinese}) P(\texttt{</s>|food})          \\
+     & = 0.19 \times 0.21 \times 0.0029 \times 0.052 \times 0.40      \\
+     & = 2.4 \times 10^{-6}
+\end{align*}
+
+\end{document}
