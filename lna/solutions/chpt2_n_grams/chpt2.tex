@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{listings}
-\usepackage{ctex}
+% \usepackage{ctex}
 \usepackage{amsmath}
 \usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
 
@@ -48,7 +48,7 @@ So the trigrams probabilities of \texttt{I am Same} is:
 \subsection*{3.2}
 
 \paragraph{1.}
-With Fig. 3.1
+With Fig. 3.1(no smoothing)
 \begin{align*}
     P(\texttt{<s> i want chinese food </s>})
      & = P(\texttt{i|<s>}) P(\texttt{want|i}) P(\texttt{chinese|want}) \\
@@ -66,5 +66,38 @@ Use add-1 smoothing table in Fig. 3.6
      & = 0.19 \times 0.21 \times 0.0029 \times 0.052 \times 0.40      \\
      & = 2.4 \times 10^{-6}
 \end{align*}
+
+\subsection*{3.3}
+
+\paragraph{}
+Probabilities using add-1 smoothing is lower since it save probabilities
+mass for unseen words in intuition. Now we prove it using the equation:
+
+$$P_{add-1}(c_i) = \displaystyle\frac{C(c_i) + 1}{C(c_{i-1}) + V}$$
+
+\paragraph{}
+For each bigrams whose count is greater than 1 
+is multiplied by a normalized factor $\displaystyle\frac{C(c_{i-1})}{C(c_{i-1}) + V}$.
+As mentioned in this chapter before, the probabilities for those n-grams is discounted.
+
+
+\subsection*{3.4}
+
+\paragraph{}
+\begin{align*}
+    P_{add-1}(\texttt{Sam|am}) & = \frac{C(\texttt{am Sam}) + 1}{C((\texttt{am}) + V)} \\
+    & = \frac{3}{3 + 11}
+    & = 0.2143
+\end{align*}
+
+\subsection*{3.5}
+
+\paragraph*{}
+\begin{align*}
+    pass
+\end{align*}
+
+
+\subsection*{}
 
 \end{document}
