@@ -11,7 +11,7 @@
 \begin{titlepage}
     \title{Chapter 2}
     \author{Zac Bi}
-    \date{\today}
+    \date{December 9, 2019}
     \maketitle
     \pagestyle{empty}
 \end{titlepage}
@@ -70,15 +70,15 @@ Use add-1 smoothing table in Fig. 3.6
 \subsection*{3.3}
 
 \paragraph{}
-Probabilities using add-1 smoothing is lower since it save probabilities
+Probabilities using add-1 smoothing is lower since it saves probabilities
 mass for unseen words in intuition. Now we prove it using the equation:
 
 $$P_{add-1}(c_i) = \displaystyle\frac{C(c_i) + 1}{C(c_{i-1}) + V}$$
 
 \paragraph{}
-For each bigrams whose count is greater than 1 
+For each bigrams whose count is greater than 1
 is multiplied by a normalized factor $\displaystyle\frac{C(c_{i-1})}{C(c_{i-1}) + V}$.
-As mentioned in this chapter before, the probabilities for those n-grams is discounted.
+As mentioned in this chapter before, the probabilities for those n-grams are discounted.
 
 
 \subsection*{3.4}
@@ -86,18 +86,45 @@ As mentioned in this chapter before, the probabilities for those n-grams is disc
 \paragraph{}
 \begin{align*}
     P_{add-1}(\texttt{Sam|am}) & = \frac{C(\texttt{am Sam}) + 1}{C((\texttt{am}) + V)} \\
-    & = \frac{3}{3 + 11}
-    & = 0.2143
+                               & = \frac{3}{3 + 11}                                    \\
+                               & = 0.2143
 \end{align*}
 
 \subsection*{3.5}
 
-\paragraph*{}
+\paragraph{}
+Use the \textbf{chain rule of probability}:
 \begin{align*}
-    pass
+    P(w_1^n) & = P(w_1)P(w_2|w_1) \dots P(w-n|w_1^{n-1}) \\
+             & = \prod_{k=1}^{n} P(w_k|w_1^{k-1})
 \end{align*}
 
+\paragraph{1.}
+As for bigram, the final formula should be $\prod_{k=1}^{n} P(w_k|w_{k-1})$.
+Mark four sentence as $s_1, s_2, s_3, s_4$.
+So the sum of four 2 word sentences is below, I ignored $P(\texttt{<s>})$
+here since every sentence is started with \texttt{<s>}.
+\begin{align*}
+    \sum_{i=1}^{4}P(w_1^2) & = P(\texttt{a b}) + P(\texttt{a a}) + P(\texttt{b b}) + P(\texttt{b a}) \\
+                           & = P(\texttt{a|<s>})P(\texttt{b|a}) + P(\texttt{b|<s>})P(\texttt{b|b})
+    + P(\texttt{b|<s>})P(\texttt{a|b}) + P(\texttt{a|<s>})P(\texttt{b|a})                            \\
+                           & = \frac{1}{2} \times \frac{1}{2} \times 4                               \\
+                           & = 1
+\end{align*}
 
-\subsection*{}
+\paragraph{2.}
+There is eight 3 word sentences: \texttt{aaa, aab, aba, abb, baa, bab, bba, bbb}.
+It's obvious the sum of probabilities of all these sentences is 1.
+Without loss of generality, for a bigram model the sum of probabilities of all k(k=1\dots n).
+Taking a easy example assuming k=2, the sum of probabilities could be writen as:
+\begin{align*}
+    P(\texttt{<s>})\sum_v \sum_w P(v|\texttt{<s>} P(w|v) & = \sum_v P(v|\texttt{<s>}) \sum_w P(w|v) \\
+                                                         & = \sum_v P(v|\texttt{<s>})               \\
+                                                         & = 1
+\end{align*}
+\paragraph{}
+For more longer sentence, the same is ture. After adding \texttt{<s>}, all sentence lengths will be assigned
+a single probability distribution since $\sum_w P(\texttt{</s>}|w)$ is obvious less than 1.0.
+
 
 \end{document}
