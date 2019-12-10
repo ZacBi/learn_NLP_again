@@ -3,6 +3,7 @@
 % \usepackage{ctex}
 \usepackage{amsmath}
 \usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+\usepackage[colorlinks, urlcolor=blue]{hyperref}
 
 
 \begin{document}
@@ -13,14 +14,13 @@
     \author{Zac Bi}
     \date{December 9, 2019}
     \maketitle
-    \pagestyle{empty}
+    \thispagestyle{empty}
 \end{titlepage}
 
 
 \section*{Solutions}
 
 \subsection*{3.1}
-
 \paragraph{1.}
 Equation for trigram prob estimation:
 
@@ -46,7 +46,6 @@ So the trigrams probabilities of \texttt{I am Same} is:
 \end{align*}
 
 \subsection*{3.2}
-
 \paragraph{1.}
 With Fig. 3.1(no smoothing)
 \begin{align*}
@@ -68,7 +67,6 @@ Use add-1 smoothing table in Fig. 3.6
 \end{align*}
 
 \subsection*{3.3}
-
 \paragraph{}
 Probabilities using add-1 smoothing is lower since it saves probabilities
 mass for unseen words in intuition. Now we prove it using the equation:
@@ -82,7 +80,6 @@ As mentioned in this chapter before, the probabilities for those n-grams are dis
 
 
 \subsection*{3.4}
-
 \paragraph{}
 \begin{align*}
     P_{add-1}(\texttt{Sam|am}) & = \frac{C(\texttt{am Sam}) + 1}{C((\texttt{am}) + V)} \\
@@ -91,7 +88,6 @@ As mentioned in this chapter before, the probabilities for those n-grams are dis
 \end{align*}
 
 \subsection*{3.5}
-
 \paragraph{}
 Use the \textbf{chain rule of probability}:
 \begin{align*}
@@ -101,7 +97,7 @@ Use the \textbf{chain rule of probability}:
 
 \paragraph{1.}
 As for bigram, the final formula should be $\prod_{k=1}^{n} P(w_k|w_{k-1})$.
-Mark four sentence as $s_1, s_2, s_3, s_4$.
+I mark four sentence as $s_1, s_2, s_3, s_4$.
 So the sum of four 2 word sentences is below, I ignored $P(\texttt{<s>})$
 here since every sentence is started with \texttt{<s>}.
 \begin{align*}
@@ -116,7 +112,7 @@ here since every sentence is started with \texttt{<s>}.
 There is eight 3 word sentences: \texttt{aaa, aab, aba, abb, baa, bab, bba, bbb}.
 It's obvious the sum of probabilities of all these sentences is 1.
 Without loss of generality, for a bigram model the sum of probabilities of all k(k=1\dots n).
-Taking a easy example assuming k=2, the sum of probabilities could be writen as:
+Taking a easy example assuming k=2, the sum of probabilities could be written as:
 \begin{align*}
     P(\texttt{<s>})\sum_v \sum_w P(v|\texttt{<s>} P(w|v) & = \sum_v P(v|\texttt{<s>}) \sum_w P(w|v) \\
                                                          & = \sum_v P(v|\texttt{<s>})               \\
@@ -124,7 +120,43 @@ Taking a easy example assuming k=2, the sum of probabilities could be writen as:
 \end{align*}
 \paragraph{}
 For more longer sentence, the same is ture. After adding \texttt{<s>}, all sentence lengths will be assigned
-a single probability distribution since $\sum_w P(\texttt{</s>}|w)$ is obvious less than 1.0.
+a single probability distribution since $\sum_w P(\texttt{</s>}|w)$ is obviously less than 1.0.
+
+\subsection*{3.6}
+\paragraph{1.}
+\begin{align*}
+    P(w_3|w_1, w_2) & = \frac{C(w_1 w_2 w_3)}{\sum_w (c(w_1 w_2 w) + 1)} \\
+                    & =  \frac{C(w_1 w_2 w_3)}{\sum_w c(w_1 w_2 w) + V}
+\end{align*}
+
+\subsection*{3.7}
+\paragraph{1.}
+Recall the backoff interpolation smotthing:
+\begin{align*}
+    \hat{P}(\texttt{Sam|am}) & = \lambda(w_1^2)P(\texttt{Sam|am}) + \lambda(w_1)P(\texttt{Sam})   \\
+                             & = \frac{1}{2} \times \frac{C(\texttt{am Sam})}{C(\texttt{am})}
+    + \frac{1}{2} \times \frac{C(\texttt{Sam})}{\sum_w C(w)}                                      \\
+                             & = \frac{1}{2} \times \frac{2}{3} + \frac{1}{2} \times \frac{4}{25} \\
+                             & = \frac{31}{75}                                                    \\
+                             & = 0.413
+\end{align*}
+
+
+\subsection*{3.8-3.11}
+\paragraph{}
+Get the implementation of algorithms in \href{https://github.com/ZacBi/learn_NLP_again/tree/master/lna/algorithms}{ZacBi/learn\_NLP\_again/lna/algorithms}
+
+\subsection*{3.12}
+\paragraph{}
+As described in the exercise, the probability for 0 is $P(0) = 0.91$ while the probability for i(i=1\dots9) is $P(i) = 0.01$.
+So the probability for \tt{0 0 0 0 0 3 0 0 0 0} should be:
+\begin{align*}
+    PP(test set) & = P(\tt{0 0 0 0 0 3 0 0 0 0})^{-\frac{1}{10}}    \\
+                 & = \sqrt[10]{\prod_{i=1}^{9}\frac{1}{\tt{P(0)}} \
+        \times \frac{1}{P(\tt{3})}}                                 \\
+        & = \sqrt[10]{\frac{1}{0.91^9 \times 0.01}} \\
+        & = 1.37
+\end{align*}
 
 
 \end{document}
