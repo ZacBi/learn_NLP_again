@@ -71,10 +71,10 @@ Use add-1 smoothing table in Fig. 3.6
 Probabilities using add-1 smoothing is lower since it saves probabilities
 mass for unseen words in intuition. Now we prove it using the equation:
 
-$$P_{add-1}(c_i) = \displaystyle\frac{C(c_i) + 1}{C(c_{i-1}) + V}$$
+$$P_{add-1}(c_i) = \displaystyle\frac{C(c_i) + 1}{C(c_{i-1}) + |V|}$$
 
 \paragraph{}
-For each bigrams whose count is greater than 1
+For each bigram whose count is greater than 1
 is multiplied by a normalized factor $\displaystyle\frac{C(c_{i-1})}{C(c_{i-1}) + V}$.
 As mentioned in this chapter before, the probabilities for those n-grams are discounted.
 
@@ -82,7 +82,7 @@ As mentioned in this chapter before, the probabilities for those n-grams are dis
 \subsection*{3.4}
 \paragraph{}
 \begin{align*}
-    P_{add-1}(\texttt{Sam|am}) & = \frac{C(\texttt{am Sam}) + 1}{C((\texttt{am}) + V)} \\
+    P_{add-1}(\texttt{Sam|am}) & = \frac{C(\texttt{am Sam}) + 1}{C(\texttt{am}) + |V|} \\
                                & = \frac{3}{3 + 11}                                    \\
                                & = 0.2143
 \end{align*}
@@ -123,15 +123,15 @@ For more longer sentence, the same is ture. After adding \texttt{<s>}, all sente
 a single probability distribution since $\sum_w P(\texttt{</s>}|w)$ is obviously less than 1.0.
 
 \subsection*{3.6}
-\paragraph{1.}
+\paragraph{}
 \begin{align*}
-    P(w_3|w_1, w_2) & = \frac{C(w_1 w_2 w_3)}{\sum_w (c(w_1 w_2 w) + 1)} \\
-                    & =  \frac{C(w_1 w_2 w_3)}{\sum_w c(w_1 w_2 w) + V}
+    P(w_3|w_1, w_2) & = \frac{C(w_1 w_2 w_3) + 1}{\sum_w (c(w_1 w_2 w) + 1)} \\
+                    & =  \frac{C(w_1 w_2 w_3) + 1}{\sum_w c(w_1 w_2 w) + |V|}
 \end{align*}
 
 \subsection*{3.7}
 \paragraph{1.}
-Recall the backoff interpolation smotthing:
+Recall the backoff interpolation smoothing:
 \begin{align*}
     \hat{P}(\texttt{Sam|am}) & = \lambda(w_1^2)P(\texttt{Sam|am}) + \lambda(w_1)P(\texttt{Sam})   \\
                              & = \frac{1}{2} \times \frac{C(\texttt{am Sam})}{C(\texttt{am})}
