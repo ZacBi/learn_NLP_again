@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage{listings}
+% \usepackage{ctex}
+\usepackage{amsmath}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+\usepackage[colorlinks, urlcolor=blue]{hyperref}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+    \title{Chapter 3}
+    \author{\href{https://github.com/ZacBi}{Zac Bi}}
+    \date{December 9, 2019}
+    \maketitle
+    \thispagestyle{empty}
+\end{titlepage}
+
+
+\section*{Solutions}
+
+\subsection*{3.1}
+\paragraph{1.}
+Equation for trigram prob estimation:
+
+$$P(w_n|w_{n-2}^{n-1}) =  \displaystyle\frac{C(w_{n-2}^{n})}{\sum_{w} C(w_{n-2} w_{n-1} w)} = \displaystyle\frac{C(w_{n-2}^{n})}{C(w_{n-2} w_{n-1})}$$
+
+\paragraph{2.}
+Add '<s> <s>' and '</s> </s>' at the start and end  of each sequence for counting trigrams.
+The resulting corpus:
+\begin{align*}
+     & \texttt{<s> <s> I am Sam </s> </s>}                         \\
+     & \texttt{<s> <s> Sam am I </s> </s>}                         \\
+     & \texttt{<s> <s> I do not like green eggs and ham </s> </s>}
+\end{align*}
+
+\paragraph{}
+So the trigrams probabilities of \texttt{I am Same} is:
+\begin{align*}
+     & P(\texttt{I|<s> <s>}) = \frac{2}{3} = 0.67 \quad
+    P(\texttt{am|<s> I}) = \frac{1}{2} = 0.5 \quad
+    P(\texttt{Sam|I am}) = \frac{1}{1} = 1              \\
+     & P(\texttt{</s>|am Sam}) = \frac{1}{1} = 1 \quad
+    P(\texttt{</s>|Sam </s>}) = \frac{1}{1} = 1 \quad
+\end{align*}
+
+\subsection*{3.2}
+\paragraph{1.}
+With Fig. 3.1(no smoothing)
+\begin{align*}
+    P(\texttt{<s> i want chinese food </s>})
+     & = P(\texttt{i|<s>}) P(\texttt{want|i}) P(\texttt{chinese|want}) \\
+     & \qquad P(\texttt{food|chinese}) P(\texttt{</s>|food})           \\
+     & = 0.25 \times 0.33 \times 0.0065 \times 0.52 \times 0.68        \\
+     & = 0.0001896
+\end{align*}
+
+\paragraph{2.}
+Use add-1 smoothing table in Fig. 3.6
+\begin{align*}
+    P(\texttt{<s> i want chinese food </s>})
+     & = P(\texttt{i|<s>}) P(\texttt{want|i})P(\texttt{chinese|want}) \\
+     & \qquad P(\texttt{food|chinese}) P(\texttt{</s>|food})          \\
+     & = 0.19 \times 0.21 \times 0.0029 \times 0.052 \times 0.40      \\
+     & = 2.4 \times 10^{-6}
+\end{align*}
+
+\subsection*{3.3}
+\paragraph{}
+Probabilities using add-1 smoothing is lower since it saves probabilities
+mass for unseen words in intuition. Now we prove it using the equation:
+
+$$P_{add-1}(c_i) = \displaystyle\frac{C(c_i) + 1}{C(c_{i-1}) + |V|}$$
+
+\paragraph{}
+For each bigram whose count is greater than 1
+is multiplied by a normalized factor $\displaystyle\frac{C(c_{i-1})}{C(c_{i-1}) + V}$.
+As mentioned in this chapter before, the probabilities for those n-grams are discounted.
+
+
+\subsection*{3.4}
+\paragraph{}
+\begin{align*}
+    P_{add-1}(\texttt{Sam|am}) & = \frac{C(\texttt{am Sam}) + 1}{C(\texttt{am}) + |V|} \\
+                               & = \frac{3}{3 + 11}                                    \\
+                               & = 0.2143
+\end{align*}
+
+\subsection*{3.5}
+\paragraph{}
+Use the \textbf{chain rule of probability}:
+\begin{align*}
+    P(w_1^n) & = P(w_1)P(w_2|w_1) \dots P(w-n|w_1^{n-1}) \\
+             & = \prod_{k=1}^{n} P(w_k|w_1^{k-1})
+\end{align*}
+
+\paragraph{1.}
+As for bigram, the final formula should be $\prod_{k=1}^{n} P(w_k|w_{k-1})$.
+I mark four sentence as $s_1, s_2, s_3, s_4$.
+So the sum of four 2 word sentences is below, I ignored $P(\texttt{<s>})$
+here since every sentence is started with \texttt{<s>}.
+\begin{align*}
+    \sum_{i=1}^{4}P(w_1^2) & = P(\texttt{a b}) + P(\texttt{a a}) + P(\texttt{b b}) + P(\texttt{b a}) \\
+                           & = P(\texttt{a|<s>})P(\texttt{b|a}) + P(\texttt{b|<s>})P(\texttt{b|b})
+    + P(\texttt{b|<s>})P(\texttt{a|b}) + P(\texttt{a|<s>})P(\texttt{b|a})                            \\
+                           & = \frac{1}{2} \times \frac{1}{2} \times 4                               \\
+                           & = 1
+\end{align*}
+
+\paragraph{2.}
+There is eight 3 word sentences: \texttt{aaa, aab, aba, abb, baa, bab, bba, bbb}.
+It's obvious the sum of probabilities of all these sentences is 1.
+Without loss of generality, for a bigram model the sum of probabilities of all k(k=1\dots n).
+Taking a easy example assuming k=2, the sum of probabilities could be written as:
+\begin{align*}
+    P(\texttt{<s>})\sum_v \sum_w P(v|\texttt{<s>} P(w|v) & = \sum_v P(v|\texttt{<s>}) \sum_w P(w|v) \\
+                                                         & = \sum_v P(v|\texttt{<s>})               \\
+                                                         & = 1
+\end{align*}
+\paragraph{}
+For more longer sentence, the same is ture. After adding \texttt{<s>}, all sentence lengths will be assigned
+a single probability distribution since $\sum_w P(\texttt{</s>}|w)$ is obviously less than 1.0.
+
+\subsection*{3.6}
+\paragraph{}
+\begin{align*}
+    P(w_3|w_1, w_2) & = \frac{C(w_1 w_2 w_3) + 1}{\sum_w (c(w_1 w_2 w) + 1)} \\
+                    & =  \frac{C(w_1 w_2 w_3) + 1}{\sum_w c(w_1 w_2 w) + |V|}
+\end{align*}
+
+\subsection*{3.7}
+\paragraph{1.}
+Recall the backoff interpolation smoothing:
+\begin{align*}
+    \hat{P}(\texttt{Sam|am}) & = \lambda(w_1^2)P(\texttt{Sam|am}) + \lambda(w_1)P(\texttt{Sam})   \\
+                             & = \frac{1}{2} \times \frac{C(\texttt{am Sam})}{C(\texttt{am})}
+    + \frac{1}{2} \times \frac{C(\texttt{Sam})}{\sum_w C(w)}                                      \\
+                             & = \frac{1}{2} \times \frac{2}{3} + \frac{1}{2} \times \frac{4}{25} \\
+                             & = \frac{31}{75}                                                    \\
+                             & = 0.413
+\end{align*}
+
+
+\subsection*{3.8-3.11}
+\paragraph{}
+Get the implementation of algorithms in \href{https://github.com/ZacBi/learn_NLP_again/tree/master/lna/algorithms}{ZacBi/learn\_NLP\_again/lna/algorithms}
+
+\subsection*{3.12}
+\paragraph{}
+As described in the exercise, the probability for 0 is $P(0) = 0.91$ while the probability for i(i=1\dots9) is $P(i) = 0.01$.
+So the probability for \tt{0 0 0 0 0 3 0 0 0 0} should be:
+\begin{align*}
+    PP(test set) & = P(\tt{0 0 0 0 0 3 0 0 0 0})^{-\frac{1}{10}}    \\
+                 & = \sqrt[10]{\prod_{i=1}^{9}\frac{1}{\tt{P(0)}} \
+        \times \frac{1}{P(\tt{3})}}                                 \\
+        & = \sqrt[10]{\frac{1}{0.91^9 \times 0.01}} \\
+        & = 1.37
+\end{align*}
+
+
+\end{document}

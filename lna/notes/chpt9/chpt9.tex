@@ -1,0 +1,64 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{ctex}
+\usepackage{amsmath}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+\usepackage[colorlinks, urlcolor=blue]{hyperref}
+% \usepackage{ctex}
+
+\begin{document}
+
+\begin{titlepage}
+    \title{Chapter 2 Notes}
+    \author{\href{https://github.com/ZacBi}{Zac Bi}}
+    \date{\today}
+    \maketitle
+    \pagestyle{empty}
+\end{titlepage}
+
+\section{Why we need LSTM and GRU?}
+
+\subsection{Grandient vanish and explosion}
+
+\paragraph*{}
+首先需要谈到的问题是梯度爆炸和梯度消失。首先回顾一下SRN(simple Recurrent NN)中的Loss计算
+\begin{align*}
+    h_t &= f(W^h h_{t-1} + W^x x(t) + b) \\
+    \hat{y}_t &= g(W^s h_t) \\
+    L_t &= Loss(\hat{y}_t, y_t) \\
+    L &= \sum_{t=1}^{T} L_t
+\end{align*}
+
+\paragraph*{}
+现在来求Loss对于隐层单元的梯度$\frac{\partial L}{\partial W}$：
+\begin{align*}
+    \frac{\partial L}{\partial W^h} & = \sum_{t=1}^{T} \frac{\partial L_t}{\partial W^h} \\
+    \frac{\partial L_t}{\partial W^h} & = \sum_{k=1}^{t} \frac{\partial L_t}{\partial \hat{y}_t} 
+    \cdot \frac{\partial \hat{y}_t}{\partial{h_t}}
+    \cdot \frac{\partial h_t}{\partial{h_k}} 
+    \cdot \frac{\partial h_k}{\partial{W^h}}
+    \\
+\end{align*}
+
+\paragraph*{}
+其中$\frac{\partial h_t}{\partial{h_k}}$又可写成下式，最后的结果是根据Jaccobian矩阵得来，可以自己推导一下，其中$z_j = W^h h_{t-1} + W^x x(t) + b$)
+\begin{align*}
+    \frac{\partial h_t}{\partial{h_k}} & = \prod_{j=k+1}^{t} \frac{\partial h_j}{\partial h_{j-1}} \\
+    & = \prod_{j=k+1}^{t} \frac{\partial h_j}{\partial z_j} \cdot \frac{z_j}{h_{t-1}} \\
+    & = \prod_{j=k+1}^{t} diag(f'(z_t)) \cdot W^h
+\end{align*}
+
+\paragraph*{}
+所以最后总的Loss对$W^h$的梯度可以写成:
+\begin{align*}
+    \frac{\partial L}{\partial W^h} = \sum_{t=1}^{T} \sum_{k=1}^{t} \frac{\partial L_t}{\partial \hat{y}_t}
+    \cdot \frac{\partial \hat{y}_t}{\partial{h_t}}
+    \cdot (\prod_{j=k+1}^{t} diag(f'(z_t)) \cdot W^h)
+    \cdot \frac{\partial h_k}{\partial{W^h}}
+\end{align*}
+
+
+
+
+
+\end{document}

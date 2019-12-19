@@ -1,0 +1,137 @@
+\documentclass{article}
+\usepackage{listings}
+% \usepackage{ctex}
+\usepackage{amsmath}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+\usepackage[colorlinks, urlcolor=blue]{hyperref}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+    \title{Chapter 4: Naive Bayes}
+    \author{\href{https://github.com/ZacBi}{Zac Bi}}
+    \date{December 18, 2019}
+    \maketitle
+    \thispagestyle{empty}
+\end{titlepage}
+
+
+\section*{Solutions}
+
+\subsection*{4.1}
+\paragraph*{}
+Recall that for a doc, the prob it is labeled as class $c$:
+\begin{align*}
+    \hat{c} & = \mathop{arg} \limits_{c} \max P(c|d)                                                       \\
+            & = \mathop{arg} \limits_{c \in C} \max P(c) \! \prod_{i \in position} \!\!\!\!\!\!\! P(w_i|c)
+\end{align*}
+
+% \paragraph*{{}}
+% Compute equation above in log space to turn it to **linear classifier**:
+% \begin{align*}
+%     \hat{c} & = \mathop{arg} \limits_{c} \max \log(P(c)) + \sum_{i \in positions} \!\!\!\!\!\!\!P(w_i|c) 
+% \end{align*}
+
+For positive:
+\begin{align*}
+    P(pos|d) & = P(\texttt{I|pos}) \times \dots \times P(\texttt{films|pos}) \\
+             & = 0.09 \times 0.07 \times 0.29 \times 0.04 \times 0.08        \\
+             & = 5.84 \times 10^{-6}
+\end{align*}
+
+For negtive:
+\begin{align*}
+    P(neg|d) & = P(\texttt{I|neg}) \times \dots \times P(\texttt{films|neg}) \\
+             & = 0.16 \times 0.06 \times 0.06 \times 0.15 \times 0.11        \\
+             & = 9.5 \times 10^{-6}
+\end{align*}
+
+So NB will assign positive to the sentence 'I always like foreign films.'
+
+
+\subsection*{4.2}
+
+\paragraph*{}
+Counts and probs(after add-1 smoothing) for each word in train set($P(comedy) = 0.4, P(action) = 0.6$):
+
+\begin{center}
+    \begin{tabular}{c c c c c}
+        word    & comedy & action & $\textrm{P}_\textrm{comedy}$ & $\textrm{P}_\textrm{action}$
+        \\ \hline
+        fun     & 3      & 1      & 0.25                         & 0.111
+        \\ \hline
+        couple  & 2      & 0      & 0.1875                       & 0.055
+        \\ \hline
+        love    & 2      & 1      & 0.1875                       & 0.111
+        \\ \hline
+        fast    & 1      & 2      & 0.125                        & 0.167
+        \\ \hline
+        furious & 0      & 2      & 0.0625                       & 0.167
+        \\ \hline
+        shoot   & 0      & 4      & 0.0625                       & 0.278
+        \\ \hline
+        fly     & 1      & 1      & 0.125                        & 0.111
+    \end{tabular}
+\end{center}
+
+For P(comedy|D):
+\begin{align*}
+    P(comedy|D) & = P(comedy) \times P(w_1^n|comedy)                            \\
+                & = 0.4 \times (0.125 \times 0.1875 \times 0.0625 \times 0.125) \\
+                & = 7.3 \times 10^{-5}
+\end{align*}
+
+For P(action|D):
+\begin{align*}
+    P(action|D) & = P(action) \times P(w_1^n|action)                          \\
+                & = 0.6 \times (0.165 \times 0.055 \times 0.278 \times 0.111) \\
+                & = 1.68 \times 10^{-5}
+\end{align*}
+
+So the most likely class for D is comedy.
+
+\subsection*{4.3}
+\paragraph*{}
+
+For binarized naive Bayes, the table should like:
+\begin{center}
+    \begin{tabular}{c c c c c}
+        doc & 'good' & 'poor' & 'great' & (class) \\
+        d1  & 1      & 0      & 1       & pos     \\
+        d2  & 0      & 1      & 1       & pos     \\
+        d3  & 1      & 1      & 0       & neg     \\
+        d4  & 1      & 1      & 1       & neg     \\
+        d5  & 0      & 1      & 0       & neg     \\
+    \end{tabular}
+\end{center}
+
+\paragraph*{}
+Now we mark the test sentence as test document D, which has been removed unseen words in vocabulary, i.e,
+\texttt{good good great poor}
+then we compute probs of neg and pos for each NB model
+(mNB: multinominal NB, bNB: binarized NB).
+
+\begin{align*}
+    P_{\text{mNB}}(pos|D) & = P_{\text{mNB}}(pos) \times \prod_{i \in positions}P_{\text{mNB}}(w_i|pos)      \\
+                          & = P_{\text{mNB}}(pos) \times                                                     \\
+                          & \quad P_{\text{mNB}}(\texttt{good}|pos) \times P_{\text{mNB}}(\texttt{good}|pos)
+    \times P_{\text{mNB}}(\texttt{poor}|pos) \times P_{\text{mNB}}(\texttt{great}|pos)                       \\
+                          & = 0.4 \times 0.33 \times 0.33 \times 0.5 \times 0.17                             \\
+                          & = 0.0037                                                                         \\
+    P_{\text{mNB}}(neg|D) & = P_{\text{mNB}}(neg) \times \prod_{i \in positions}P_{\text{mNB}}(w_i|neg)      \\
+                          & = 0.6 \times 0.176 \times 0.176 \times 0.176 \times 0.647                        \\
+                          & = 0.0021                                                                         \\
+    P_{\text{bNB}}(pos|D) & = P_{\text{bNB}}(pos) \times \prod_{i \in positions}P_{\text{bNB}}(w_i|pos)      \\
+                          & = 0.4 \times 0.286 \times 0.286 \times 0.428 \times 0.286                        \\
+                          & = 0.004                                                                          \\
+    P_{\text{bNB}}(neg|D) & = P_{\text{bNB}}(neg) \times \prod_{i \in positions}P_{\text{bNB}}(w_i|neg)      \\
+                          & = 0.6 \times 0.33 \times 0.33 \times 0.22 \times 0.45                            \\
+                          & = 0.006                                                                          \\
+\end{align*}
+
+\paragraph*{}
+Multinominal NB model assigns pos to D while binarized NB model is just the opposite.
+
+\end{document}
