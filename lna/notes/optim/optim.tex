@@ -1,0 +1,221 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{xeCJK}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{datetime}
+\usepackage{indentfirst}
+\setlength{\parindent}{2em}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+\usepackage[colorlinks, urlcolor=blue]{hyperref}
+
+% renew
+\renewcommand{\today}{\number\year 年 \number\month 月 \number\day 日}
+
+
+\begin{document}
+
+\begin{titlepage}
+    \title{Optimization in Deeplearning}
+    \author{\href{https://github.com/ZacBi}{Zac Bi}}
+    \maketitle
+    \pagestyle{empty}
+\end{titlepage}
+
+\section{Why we need LSTM and GRU?}
+
+\subsection{Grandient vanish and explosion}
+
+梯度爆炸就不说了, 训练过程中表现为tensor的某个值为NaN, 造成无法计算, 一般的解决方法是gradient clip(梯度裁剪)
+主要讨论的是gradient vanish, 说实话, 这个问题已经被讲烂了, 但是看了好多文章, 都是从矩阵的某个值讨论, 或者
+直接从intuition的角度去讨论, 实在让人费解: 明明有严格的数学推导, 为啥不讲呢, 是Jaccobian Matrix飘了, 还是Spectral norm不够骚了?
+
+下面这段推导和分析大部分来自这篇\href{https://arxiv.org/pdf/1211.5063.pdf}{paper}.
+数学推导都需要定义一些annotation:
+\begin{align*}
+     & \textbf{E} \in \textbf{R}: \text{整体损失, 可理解为每一时间步的损失加和;} \\
+     & \textbf{W} \in \textbf{R}^{d \times d}: \text{隐层单元的权重;}            \\
+     & \textbf{h} \in \textbf{R}^d: \text{隐层状态}                              \\
+     & \textbf{y} \in \textbf{R}^d: \text{输出;}                                 \\
+     & \textbf{z} \in \textbf{R}^d: \text{仿射层;}                               \\
+     & diag: \text{对角矩阵.}
+\end{align*}
+
+我们知道BPTT(back propagation through time)在vallina RNN中可以写成:
+\begin{align}
+    \frac{\partial \textbf{E}}{\partial \textbf{W}} = \sum_{t=1}^{T} \frac{\partial \textbf{E}_t}{\partial \textbf{W}}
+\end{align}
+
+其中$\frac{\partial \textbf{E}_t}{\partial \textbf{W}}$又可以写成:
+\begin{align}
+    \frac{\partial \textbf{E}_t}{\partial \textbf{W}} & = \sum_{k=1}^{t} \frac{\partial \textbf{E}_t}{\textbf{y}_t}
+    \frac{\partial \textbf{y}_t}{\partial \textbf{h}_t} \frac{\partial \textbf{h}_t}{\partial \textbf{h}_k}
+    \frac{\partial \textbf{h}_k}{\partial \textbf{W}}
+\end{align}
+
+其中$\frac{\partial \textbf{h}_t}{\partial \textbf{h}_k}$又又可以写成
+\begin{align}
+    \frac{\partial \textbf{h}_t}{\partial \textbf{h}_k} & = \prod_{j=k+1}^{t} \frac{\partial \textbf{h}_j}{\partial \textbf{h}_{j-1}}  \\
+                                                        & = \prod_{j=k+1}^{t} \frac{\partial \textbf{h}_j}{\partial f(\textbf{z}_{j})}
+    \frac{\partial f(\textbf{z}_{j})}{\partial \textbf{h}_{j-1}}                                                                       \\
+                                                        & = \prod_{j=k+1}^{t} diag(f'(\textbf{z}_{j})) \cdot \textbf{W}
+\end{align}
+
+可能对$diag(f'(\textbf{z}_{j}))$有点疑问, 为啥这样写呢? 因为Jacobian matrix是这么写的:
+\begin{equation*}
+    \frac{\partial \textbf{h}_t}{\partial \textbf{z}_t} =
+    \begin{bmatrix}
+        \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{z}_{t,1}} & \cdots        & \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{z}_{t,d}} \\
+        \vdots                                                      & \ddots \vdots                                                               \\
+        \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{z}_{t,d}} & \cdots        & \frac{\partial \textbf{h}_{t,d}}{\partial \textbf{z}_{t,d}}
+    \end{bmatrix}
+\end{equation*}
+
+注意Jacobian矩阵的某一个元素$\left[\frac{\partial {h}_{t}}{\partial {z}_{t}}\right]_{i,j} = \left[\frac{\partial {h}_{t,i}}{\partial {z}_{t,j}}\right]$
+只有当$i == j$ 时该元素才有值, 且值为$f'(z_{t,j})$. 
+暂时需要记住: (1)矩阵的乘积可以通过矩阵的谱范数进行近似, 谱范数也就是矩阵的L-2范数, 其值为矩阵最大的奇异值.
+(2)由谱范数的相容性性质, 有||AB|| $\leq$ ||A|| ||B||
+\begin{align*}
+    \begin{Vmatrix}
+        \frac{\partial \textbf{h}_t}{\partial \textbf{h}_{t-1}}
+    \end{Vmatrix}
+    \leq
+    \begin{Vmatrix}
+        \textbf{W}
+    \end{Vmatrix}
+    \begin{Vmatrix}
+        diag(f'( \textbf{z}_t ))
+    \end{Vmatrix}
+    \leq \beta_h \beta_w
+\end{align*}
+
+代入到(3)式中有:
+\begin{align*}
+    \begin{Vmatrix}
+        \frac{\partial \textbf{h}_t}{\partial \textbf{h}_{k}}
+    \end{Vmatrix}
+    =
+    \begin{Vmatrix}
+        \prod_{j=k+1}{t} \frac{\partial \textbf{h}_j}{\partial \textbf{h}_{j-1}}
+    \end{Vmatrix}
+    \leq (\beta_h \beta_w)^{t-k}
+\end{align*}
+
+一般来说, $\beta_h$是小于等于1的(sigmoid, tanh等), 主要考虑的是$\beta_W$. 当$(\beta_h \beta_w)$小于1时, 
+$(\beta_h \beta_w)^{t-k}$ 因为其指数级的形式将远小于1. 而对于当前时间步越远的输入, 其对当前时间步的梯度贡献越小, 就无法建立有效的长距离依赖.
+实践之中梯度消失更常见, 相对于梯度爆炸来说也没有特别有效的解决方法(指完全解决, 毕竟梯度爆炸可以用梯度裁剪保留一部分梯度), 所以一般来说更侧重研究梯度消失.
+
+\subsection{LSTM解决了Gradient vanish吗?}
+答案是没有, 但是一定程度上缓解了梯度消失. 需要对梯度流进行计算. 
+概括一下是因为LSTM中的加法和门机制使得梯度容易控制. 因为gate是在每个时间步去学习的, 所以在每个时间步的递归梯度
+可以通过那一个时间步学习到的门来控制梯度的消失或者保留. 具体的推导先留个坑吧. 可以先看这篇. 
+
+
+
+
+\section{归一化(Normalization)}
+
+看过了深度学习500问, 总感觉写的很不明确, 还是想把归一化给理一下。
+
+\subsection{为什么需要归一化？}
+
+
+我们知道, 归一化是将我们的特征/向量中的分量(scalar)统一到一个区间, 比如[0, 1]或者[-1, 1]。
+但是为什么要做归一化呢？很常见地解释之一是归一化使得使用梯度下降法求解问题的模型, 在损失函数等高线上的轮廓可能表现为均向性,
+但是由于特征分量的量纲不同, 比如输入特征$\textbf{x} \in R^d$, $\textbf{x}_1$取值范围为[0, 3],
+$\textbf{x}_2$的取值范围为[0, 1000], 就有可能出现即使梯度等高线是均向的, 但梯度仍以'之'字形在移动, 收敛速度较慢,
+但对各个分量统一量纲后, 可以使得梯度方向尽可能指向最优点. 注意上述是建立在\textbf{等高线均向但特征向量各分量量纲不一}的情况下讨论的.
+
+对于上面这种说法, 我是加了一点补充的, 因为还没有看到相关的paper或者book专门说明权重或者数据输入的量纲不同对于梯度等高线的影响.
+仍然需要进一步验证. 需要注意的是, 对于数据和权重的归一化能极大优化训练的效果, 已经被证明可行的, 后面BN, LN, WN, GN, IN等会提到这些.
+
+\subsection{归一化的一般形式}
+
+第一种是线性函数归一化(Min-max scaling):
+
+\begin{align}
+    X_{\text{norm}} = \frac{X - X_{\text{min}}}{X_{\text{max}} - X_{\text{min}}}
+\end{align}
+
+第二种是零均值归一化(Z-score norm):
+
+\begin{align}
+    X_{\text{norm}} = \frac{ X - \mathbb{E}[X]}{ \sqrt{\mathbb{D}[X]}}
+\end{align}
+
+\subsection{\href{http://arxiv-web1.library.cornell.edu/abs/1502.03167v1}{批归一化(Batch Normaliz)}}
+
+BN应该是面试的时候最喜欢问的. 首先讲一下BN.
+
+\subsubsection{BN解决了什么问题?}
+
+paper中提到的是Internal covariat shift问题, 需要先来解释一下covariate shift是啥.
+当训练数据集和测试数据集的分布不一致的时候, 训练出来的模型就不一定在测试集上表现的很好, 这种现象就是covariate shift.
+用概率来表示, 就是两个数据集的条件分布一致但边缘分布不一致, 即$P_s(Y|X) == P_t(Y|X)$但$P_s(X) != P_t(X)$
+为什么covariate shift会影响表现呢?这里面的分析暂且搁置.
+
+Internal covariat shift指的就是, 在网络各层中, 上一层的输出经过仿射变换以后, 再作为下一层的输入进行计算, 这个过程中间,
+就会造成上一层的输入和下一层的输入之间的covariat shift, 因为发生在网络内部, 所以称为'internal'
+
+\subsubsection{(BN是怎么做的)}
+
+首先BN做了两点假设: 假设输入向量/特征$\textbf{x} = [x_1, x_2, \dots, x_n]$的各个分量独立; 使用mini-batch来替代对整个数据集做norm.
+第一个假设可以表述为:
+
+\begin{align}
+    \hat{x}^{(k)} = \frac{x^{(k)} - \mathbb{E}[x^{(k)}]}{\sqrt{\mathbb{D}[x^{(k)}]}}
+\end{align}
+
+注意到当我们对\textbf{x}做零均值规范化(归一化)以后, \textbf{x}服从于期望为0, 方差为1的分布, 对于像sigmoid, tanh这样的激活函数来讲,
+激活值就落到了线性区域, 也就是非饱和区(non-saturated regime). 但是这样的规范化可能会损害该层的表示能力, BN中为了解决这一点,
+又设置了两个可学习的参数\textbf{$\gamma, \beta$}. (3)式可以进一步写成:
+
+\begin{align}
+    y^{(k)} = \gamma^{(k)} \hat{x}^{(k)} + \beta^{(k)}
+\end{align}
+
+
+第二个假设, 我们对变量x的期望做了改变(也就是抽样), 令抽取的样本集上的期望和方差取代总样本的期望和方差. 但是为了处理数值稳定性, 额外添加了一个参数$\epsilon$:
+注意$\hat{x}_i$中的下标指的是mini-batch中的第i个样本, $\mu$和$\sigma$是mini-batch的均值和标准差.
+\begin{align}
+    \hat{x}_i = \frac{x_i - \mu}{\sqrt{\sigma^2 + \epsilon}}
+\end{align}
+
+\subsubsection{训练和预测(train and inference)}
+
+假设我们的激活函数为$\textbf{z} = f\textbf{(Wu + b)}$, 其中$\textbf{x = Wu + b}$, 我们norm的对象应该为\textbf{x}.
+训练过程无需赘言, 前向和反向传播一下就行了. 重要的是inference的过程.
+注意到在inference过程中间, 我们的数据是不可能以batch的形式进行归一化的, 这里我们需要对inference的输入的方差和期望进行更改.
+对于训练过程中的每一个mini-batch, 我们记录下这些期望$\mu$和方差$\sigma$. 然后再为inference的输入\textbf{x}生成期望和方差:
+其中infer的输入的方差为训练集方差的\href{https://baike.baidu.com/item/%E6%97%A0%E5%81%8F%E4%BC%B0%E8%AE%A1/3370664?fr=aladdin}{\textbf{无偏估计}}.
+
+\begin{align}
+    \mathbb{E}[x] & = \mathbb{E}[\mu]                  \\
+    \mathbb{D}[x] & = \tfrac{m}{m-1}\mathbb{E}[\sigma]
+\end{align}
+
+那\textbf{x}可以写为:
+
+\begin{align}
+    \hat{x} = \frac{x - \mathbb{E}[x]}{\sqrt{\mathbb{D}[x]}}
+\end{align}
+
+因为$\mathbb{E}[x]$和$\mathbb{D}[x]$是固定的, 那么可以用一个仿射取替代没一层的计算(稍微减少一下计算量):
+
+\begin{align}
+    y = \tfrac{\gamma}{\sqrt{\mathbb{D}[x]}} \cdot x + (\beta - \tfrac{\mathbb{E}[x]}{\sqrt{\mathbb{D}[x]}})
+\end{align}
+
+最终我们的激活函数$\textbf{z} = f\textbf{(Wu + b)}$就可以写成$\textbf{z} = f(\text{BN}(\textbf{Wu}))$, 为什么要去掉偏置项$b$呢? 因为在求期望和方差的过程中被抵消掉了.
+
+\subsubsection{\href{http://arxiv.org/abs/1805.11604}{How Does Batch Normalization Help Optimization?}}
+
+有意思的来了, 前面说BN主要解决的是internal covariate shift, 那么到底解决了吗?
+上面这篇paper给出的答案是没有.
+
+
+
+
+
+
+\end{document}
