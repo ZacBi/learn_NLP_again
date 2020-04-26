@@ -5,11 +5,11 @@ from copy import deepcopy
 
 
 def min_edit_distance(
-        source: str,
-        target: str,
-        del_cost=1,
-        ins_cost=1,
-        sub_cost=2,
+    source: str,
+    target: str,
+    del_cost=1,
+    ins_cost=1,
+    sub_cost=2,
 ):
     """Minimum-Edit-Distance(DP)
 
@@ -57,11 +57,11 @@ def min_edit_distance(
 
 
 def min_edit_distance_pro(
-        source: str,
-        target: str,
-        del_cost=1,
-        ins_cost=1,
-        sub_cost=2,
+    source: str,
+    target: str,
+    del_cost=1,
+    ins_cost=1,
+    sub_cost=2,
 ):
     """Augmented minimum-edit-distance(DP) with alignment.
 
