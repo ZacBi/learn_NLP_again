@@ -1,0 +1,47 @@
+\documentclass{article}
+
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+
+\setlength{\parindent}{2em}
+\usepackage[colorlinks, urlcolor=blue]{hyperref}
+\usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
+
+\begin{document}
+
+\begin{titlepage}
+    \title{分词}
+    \author{\href{https://github.com/ZacBi}{Zac Bi}}
+    \date{\today}
+    \maketitle
+    \pagestyle{empty}
+\end{titlepage}
+
+\paragraph{题外}
+因为找工作复习原因, 开始琢磨PTM的一些细节来,
+发现好多blog都说wordpiece的实现方式之一是BPE(byte-pair encoding), 这是一种\textbf{谬误}.
+至于中文的分词BERT都是以字为单位, 即按字分词. 当然也可以选择使用分词工具如jieba分词, 这些就不讨论了.
+
+\section{前言}
+
+\paragraph{}~{}
+这里谈的分词基本都是解决英文的OOV问题, 合适的分词方法能够消除一部分testset的OOV问题. 为什么这么说呢?
+比如trainset里面出现'low', testset里面出现'lowest', 注意这两个词是排他的, 如果不分词的话会产生OOV问题,
+即模型接收'lowest'的时候只能把它当成一个'[\textbf{UNK}]'.
+分词的话'lowest'会被分成\texttt{['low', '\#\#est']}(以wordpiece举例), 这样就不会造成OOV问题(仅对这一个例子来说).
+当然解决OOV问题也不止分词这一种方法, 在NMT中, 直接从source里将OOV的word复制到target也是一种解决方法.
+对于有些downstream task OOV重要, 有些不重要, 不详细讲解.
+
+
+\section{BPE}
+
+BPE是一种启发式的分词方法, 核心idea是\textbf{迭代的将频率最大的字符对合并}.
+在字符串序列简单分词为包含token的一个list后(比如以空格为分隔符), BPE再将每个token划分成含最小单元字符的序列,
+并在该序列头部加上'\_', e.g. \texttt{['low']} $\rightarrow$ \texttt{['\_', 'l', 'o', 'w']}.
+算法的每一步, 都会找到频率最大的一对字符(串)('A', 'B'), 将他们替换为('AB'), 并将('AB')加入vocab.
+重复该过程k步直到我们的vocab到达一定大小.
+
+\end{document}
