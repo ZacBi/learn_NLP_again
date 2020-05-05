@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{datetime}
 \usepackage{indentfirst}
+\usepackage{color}
 \setlength{\parindent}{2em}
 \usepackage[a4paper, left = 2cm, right = 2cm]{geometry}
 \usepackage[colorlinks, urlcolor=blue]{hyperref}
@@ -24,7 +25,7 @@
 
 \section{Why we need LSTM and GRU?}
 
-\subsection{Grandient vanish and explosion}
+\subsection{Gradient vanish and explosion}
 
 梯度爆炸就不说了, 训练过程中表现为tensor的某个值为NaN, 造成无法计算, 一般的解决方法是gradient clip(梯度裁剪)
 主要讨论的是gradient vanish, 说实话, 这个问题已经被讲烂了, 但是看了好多文章, 都是从矩阵的某个值讨论, 或者
@@ -37,7 +38,7 @@
      & \textbf{W} \in \textbf{R}^{d \times d}: \text{隐层单元的权重;}            \\
      & \textbf{h} \in \textbf{R}^d: \text{隐层状态}                              \\
      & \textbf{y} \in \textbf{R}^d: \text{输出;}                                 \\
-     & \textbf{z} \in \textbf{R}^d: \text{仿射层;}                               \\
+     & \textbf{u} \in \textbf{R}^d: \text{仿射层;}                               \\
      & diag: \text{对角矩阵.}
 \end{align*}
 
@@ -56,23 +57,23 @@
 其中$\frac{\partial \textbf{h}_t}{\partial \textbf{h}_k}$又又可以写成
 \begin{align}
     \frac{\partial \textbf{h}_t}{\partial \textbf{h}_k} & = \prod_{j=k+1}^{t} \frac{\partial \textbf{h}_j}{\partial \textbf{h}_{j-1}}  \\
-                                                        & = \prod_{j=k+1}^{t} \frac{\partial \textbf{h}_j}{\partial f(\textbf{z}_{j})}
-    \frac{\partial f(\textbf{z}_{j})}{\partial \textbf{h}_{j-1}}                                                                       \\
-                                                        & = \prod_{j=k+1}^{t} diag(f'(\textbf{z}_{j})) \cdot \textbf{W}
+                                                        & = \prod_{j=k+1}^{t} \frac{\partial \textbf{h}_j}{\partial f(\textbf{u}_{j})}
+    \frac{\partial f(\textbf{u}_{j})}{\partial \textbf{h}_{j-1}}                                                                       \\
+                                                        & = \prod_{j=k+1}^{t} diag(f'(\textbf{u}_{j})) \cdot \textbf{W}
 \end{align}
 
-可能对$diag(f'(\textbf{z}_{j}))$有点疑问, 为啥这样写呢? 因为Jacobian matrix是这么写的:
+可能对$diag(f'(\textbf{u}_{j}))$有点疑问, 为啥这样写呢? 因为Jacobian matrix是这么写的:
 \begin{equation*}
-    \frac{\partial \textbf{h}_t}{\partial \textbf{z}_t} =
+    \frac{\partial \textbf{h}_t}{\partial \textbf{u}_t} =
     \begin{bmatrix}
-        \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{z}_{t,1}} & \cdots        & \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{z}_{t,d}} \\
+        \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{u}_{t,1}} & \cdots        & \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{u}_{t,d}} \\
         \vdots                                                      & \ddots \vdots                                                               \\
-        \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{z}_{t,d}} & \cdots        & \frac{\partial \textbf{h}_{t,d}}{\partial \textbf{z}_{t,d}}
+        \frac{\partial \textbf{h}_{t,1}}{\partial \textbf{u}_{t,d}} & \cdots        & \frac{\partial \textbf{h}_{t,d}}{\partial \textbf{u}_{t,d}}
     \end{bmatrix}
 \end{equation*}
 
-注意Jacobian矩阵的某一个元素$\left[\frac{\partial {h}_{t}}{\partial {z}_{t}}\right]_{i,j} = \left[\frac{\partial {h}_{t,i}}{\partial {z}_{t,j}}\right]$
-只有当$i == j$ 时该元素才有值, 且值为$f'(z_{t,j})$. 
+注意Jacobian矩阵的某一个元素$\left[\frac{\partial {h}_{t}}{\partial {u}_{t}}\right]_{i,j} = \left[\frac{\partial {h}_{t,i}}{\partial {u}_{t,j}}\right]$
+只有当$i == j$ 时该元素才有值, 且值为$f'(z_{t,j})$.
 暂时需要记住: (1)矩阵的乘积可以通过矩阵的谱范数进行近似, 谱范数也就是矩阵的L-2范数, 其值为矩阵最大的奇异值.
 (2)由谱范数的相容性性质, 有||AB|| $\leq$ ||A|| ||B||
 \begin{align*}
@@ -84,7 +85,7 @@
         \textbf{W}
     \end{Vmatrix}
     \begin{Vmatrix}
-        diag(f'( \textbf{z}_t ))
+        diag(f'( \textbf{u}_t ))
     \end{Vmatrix}
     \leq \beta_h \beta_w
 \end{align*}
@@ -101,21 +102,20 @@
     \leq (\beta_h \beta_w)^{t-k}
 \end{align*}
 
-一般来说, $\beta_h$是小于等于1的(sigmoid, tanh等), 主要考虑的是$\beta_W$. 当$(\beta_h \beta_w)$小于1时, 
+一般来说, $\beta_h$是小于等于1的(sigmoid, tanh等), 主要考虑的是$\beta_W$. 当$(\beta_h \beta_w)$小于1时,
 $(\beta_h \beta_w)^{t-k}$ 因为其指数级的形式将远小于1. 而对于当前时间步越远的输入, 其对当前时间步的梯度贡献越小, 就无法建立有效的长距离依赖.
 实践之中梯度消失更常见, 相对于梯度爆炸来说也没有特别有效的解决方法(指完全解决, 毕竟梯度爆炸可以用梯度裁剪保留一部分梯度), 所以一般来说更侧重研究梯度消失.
 
 \subsection{LSTM解决了Gradient vanish吗?}
-答案是没有, 但是一定程度上缓解了梯度消失. 需要对梯度流进行计算. 
+答案是没有, 但是一定程度上缓解了梯度消失. 需要对梯度流进行计算.
 概括一下是因为LSTM中的加法和门机制使得梯度容易控制. 因为gate是在每个时间步去学习的, 所以在每个时间步的递归梯度
-可以通过那一个时间步学习到的门来控制梯度的消失或者保留. 具体的推导先留个坑吧. 可以先看这篇. 
-
-
-
+可以通过那一个时间步学习到的门来控制梯度的消失或者保留. 具体的推导先留个坑吧. 可以先看这篇.
 
 \section{归一化(Normalization)}
 
 看过了深度学习500问, 总感觉写的很不明确, 还是想把归一化给理一下。
+补充: 最近把知乎那篇Norm总结又翻了一下, 发现讲的东西其实都是论文的翻译, 以前见识少,
+吃了文化的亏(逃
 
 \subsection{为什么需要归一化？}
 
@@ -132,15 +132,20 @@ $\textbf{x}_2$的取值范围为[0, 1000], 就有可能出现即使梯度等高�
 \subsection{归一化的一般形式}
 
 第一种是线性函数归一化(Min-max scaling):
-
 \begin{align}
     X_{\text{norm}} = \frac{X - X_{\text{min}}}{X_{\text{max}} - X_{\text{min}}}
 \end{align}
 
 第二种是零均值归一化(Z-score norm):
-
 \begin{align}
     X_{\text{norm}} = \frac{ X - \mathbb{E}[X]}{ \sqrt{\mathbb{D}[X]}}
+\end{align}
+
+上面两个公式暂时忘记, 用paper里面总结的一般公式. 粗体小写表示vector, 粗体大写表示matrix,
+小写表scalar, $\odot$ 表Hadamard product.
+其中\textbf{g}表示放缩因子, $\sigma$表示std, $\mu$表示期望, \textbf{W}本层权重, \textbf{x}本层输入.
+\begin{align}
+    \textbf{h} = \textbf{f} (\frac{\textbf{g}}{\sigma} \odot (\textbf{Wx} - \mu) + \textbf{b})
 \end{align}
 
 \subsection{\href{http://arxiv-web1.library.cornell.edu/abs/1502.03167v1}{批归一化(Batch Normaliz)}}
@@ -149,13 +154,13 @@ BN应该是面试的时候最喜欢问的. 首先讲一下BN.
 
 \subsubsection{BN解决了什么问题?}
 
-paper中提到的是Internal covariat shift问题, 需要先来解释一下covariate shift是啥.
+paper中提到的是Internal covariant shift问题, 需要先来解释一下covariate shift是啥.
 当训练数据集和测试数据集的分布不一致的时候, 训练出来的模型就不一定在测试集上表现的很好, 这种现象就是covariate shift.
 用概率来表示, 就是两个数据集的条件分布一致但边缘分布不一致, 即$P_s(Y|X) == P_t(Y|X)$但$P_s(X) != P_t(X)$
-为什么covariate shift会影响表现呢?这里面的分析暂且搁置.
+为什么covariant shift会影响表现呢?这里面的分析暂且搁置.
 
-Internal covariat shift指的就是, 在网络各层中, 上一层的输出经过仿射变换以后, 再作为下一层的输入进行计算, 这个过程中间,
-就会造成上一层的输入和下一层的输入之间的covariat shift, 因为发生在网络内部, 所以称为'internal'
+Internal covariant shift指的就是, 在网络各层中, 上一层的输出经过仿射变换以后, 再作为下一层的输入进行计算, 这个过程中间,
+就会造成上一层的输入和下一层的输入之间的covariant shift, 因为发生在网络内部, 所以称为'internal'
 
 \subsubsection{(BN是怎么做的)}
 
@@ -183,7 +188,7 @@ Internal covariat shift指的就是, 在网络各层中, 上一层的输出经�
 
 \subsubsection{训练和预测(train and inference)}
 
-假设我们的激活函数为$\textbf{z} = f\textbf{(Wu + b)}$, 其中$\textbf{x = Wu + b}$, 我们norm的对象应该为\textbf{x}.
+假设我们的激活函数为$\textbf{u} = f\textbf{(Wx + b)}$, 其中$\textbf{x = Wx + b}$, 我们norm的对象应该为\textbf{x}.
 训练过程无需赘言, 前向和反向传播一下就行了. 重要的是inference的过程.
 注意到在inference过程中间, 我们的数据是不可能以batch的形式进行归一化的, 这里我们需要对inference的输入的方差和期望进行更改.
 对于训练过程中的每一个mini-batch, 我们记录下这些期望$\mu$和方差$\sigma$. 然后再为inference的输入\textbf{x}生成期望和方差:
@@ -206,13 +211,35 @@ Internal covariat shift指的就是, 在网络各层中, 上一层的输出经�
     y = \tfrac{\gamma}{\sqrt{\mathbb{D}[x]}} \cdot x + (\beta - \tfrac{\mathbb{E}[x]}{\sqrt{\mathbb{D}[x]}})
 \end{align}
 
-最终我们的激活函数$\textbf{z} = f\textbf{(Wu + b)}$就可以写成$\textbf{z} = f(\text{BN}(\textbf{Wu}))$, 为什么要去掉偏置项$b$呢? 因为在求期望和方差的过程中被抵消掉了.
+最终我们的激活函数$\textbf{u} = f\textbf{(Wx + b)}$就可以写成$\textbf{u} = f(\text{BN}(\textbf{Wx}))$, 为什么要去掉偏置项$b$呢? 因为在求期望和方差的过程中被抵消掉了.
+
+在pytorch的实现中, $\mathbb{E}$和$\mathbb{D}$都是通过指数移动平均计算的. 并没有算整体的均值和方差.
+
+\subsubsection{Batch Norm的缺陷}
+
+Batch Norm的第一个缺陷是不能用于在线学习的任务, 即当batch size为1或batch中的example相似时时, 方差为0.
+第二个缺陷时Batch Norm无法用于RNN这些网络, 一些实验表明在RNN的垂直方向上(多层RNN叠加)和水平方向上(按序列展开),
+表现都不是特别好. 水平方向上到后期如果有特别长的sequence时, batch norm的缺陷表现为第一个缺陷.
+所有后来Hinton etc. 使用了Layer norm解决了这个问题.
 
 \subsubsection{\href{http://arxiv.org/abs/1805.11604}{How Does Batch Normalization Help Optimization?}}
 
 有意思的来了, 前面说BN主要解决的是internal covariate shift, 那么到底解决了吗?
-上面这篇paper给出的答案是没有.
+上面这篇paper给出的答案是没有. \textcolor{red}{这里留个坑}
 
+
+\subsection{Layer norm}
+
+layer norm是针对BN在RNN上的缺陷提出的. 公式大体上还是2.2小节中的公式就, 
+但是均值和方差的计算改变了(\textcolor{red}{可能和上面的符号不统一, 完成了整篇笔记的撰写再改吧}):
+\begin{align}
+    \mu = \frac{1}{d} \displaystyle \sum_{i=1}^{d} \textbf{u}_i \quad
+    \sigma = \sqrt{\frac{1}{d} \displaystyle \sum_{i=1}^{d} (\textbf{u}_i - \mu)^2} 
+\end{align}
+
+如上式, Layer Norm表现为对单个仿射层向量内部的\textbf{所有元素}计算期望和方差,
+而不是对一个batch内单独一个维度的所有元素计算期望和方差.
+直观的可以先看下图.
 
 
 
